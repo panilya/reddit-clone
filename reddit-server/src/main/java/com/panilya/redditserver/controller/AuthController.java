@@ -9,13 +9,12 @@ import com.panilya.redditserver.repository.RoleRepository;
 import com.panilya.redditserver.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 
@@ -37,16 +36,16 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @PostMapping("/api/v1/login")
+    @PostMapping(value = "/api/v1/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> login(@RequestBody LoginDto loginDTO) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword());
         authenticationManager.authenticate(authenticationToken);
 
         String jwtToken = jwtProvider.generateJwtToken(loginDTO.getUsername());
-        return ResponseEntity.ok(new JwtTokenResponseDto(jwtToken));
+        return ResponseEntity.ok(new JwtTokenResponseDto("Bearer " + jwtToken));
     }
 
-    @PostMapping("/api/v1/signup")
+    @PostMapping(value = "/api/v1/signup", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> signUp(@RequestBody SignUpDto signUpDto) {
         if (userRepository.existsByEmail(signUpDto.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists");
